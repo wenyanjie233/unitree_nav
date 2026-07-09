@@ -163,22 +163,22 @@ controller_server:
       debug_trajectory_details: True       # 在 RViz 中显示轨迹评分细节
 
       # 速度边界（米/秒 & 弧度/秒）：Go1 最大约 0.5m/s 平移
-      min_vel_x: -0.5                     # X 方向最小速度
-      min_vel_y: -0.5                     # Y 方向最小速度（全向）
-      max_vel_x: 0.5                      # X 方向最大速度
-      max_vel_y: 0.5                      # Y 方向最大速度（全向）
+      min_vel_x: -0.3                     # X 方向最小速度
+      min_vel_y: -0.3                     # Y 方向最小速度（全向）
+      max_vel_x: 0.3                      # X 方向最大速度
+      max_vel_y: 0.3                      # Y 方向最大速度（全向）
       max_vel_theta: 1.5                  # 最大旋转速度
       min_speed_xy: 0.0                   # 最小合速度（低于此值可原地转）
       max_speed_xy: 0.5                   # 最大合速度
       min_speed_theta: 0.0                # 最小旋转速度
 
       # 加速度限制（米/秒² & 弧度/秒²）
-      acc_lim_x: 2.5                      # X 方向最大加速度
-      acc_lim_y: 2.5                      # Y 方向最大加速度
-      acc_lim_theta: 3.2                  # 旋转最大加速度
-      decel_lim_x: -2.5                   # X 方向最大减速度
-      decel_lim_y: -2.5                   # Y 方向最大减速度
-      decel_lim_theta: -3.2               # 旋转最大减速度
+      acc_lim_x: 2.0                      # X 方向最大加速度
+      acc_lim_y: 2.0                      # Y 方向最大加速度
+      acc_lim_theta: 3.0                  # 旋转最大加速度
+      decel_lim_x: -2.0                   # X 方向最大减速度
+      decel_lim_y: -2.0                   # Y 方向最大减速度
+      decel_lim_theta: -3.0               # 旋转最大减速度
 
       # 轨迹采样：在每个维度上采样多少个速度值
       vx_samples: 20                      # X 速度采样数
@@ -198,7 +198,7 @@ controller_server:
       # === DWB 评分器（Critics）：每条轨迹由这些评分器打分，加权求和 ===
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
 
-      BaseObstacle.scale: 0.01                       # 障碍物评分权重（越小越敢靠近障碍物）
+      BaseObstacle.scale: 0.02                       # 障碍物评分权重（越小越敢靠近障碍物）
       PathAlign.scale: 32.0                           # 路径对齐权重
       PathAlign.forward_point_distance: 0.1           # 路径对齐前瞻距离
       GoalAlign.scale: 24.0                           # 目标对齐权重
@@ -230,7 +230,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0       # 代价衰减系数（越大衰减越快，膨胀圈越小）
-        inflation_radius: 0.35         # 膨胀半径（米）
+        inflation_radius: 0.55         # 膨胀半径（米）
 
       # 体素层：用 3D 点云/LaserScan 标记和清除障碍物
       voxel_layer:
@@ -246,14 +246,13 @@ local_costmap:
         scan:
           topic: /scan                 # 激光话题
           max_obstacle_height: 2.0     # 标记障碍物的最大高度（米）
-          min_obstacle_height: 0.08    # 过滤低矮物：忽略 8cm 以下的点（地面反射）
           clearing: True               # 是否清除障碍物（激光穿透=无障碍）
           marking: True                # 是否标记障碍物（激光击中=有障碍）
           data_type: "LaserScan"       # 数据类型
           raytrace_max_range: 3.0      # 光线追踪清除的最大距离（米）
           raytrace_min_range: 0.0      # 光线追踪清除的最小距离
           obstacle_max_range: 2.5      # 标记障碍物的最大距离（米）
-          obstacle_min_range: 0.15     # 忽略 15cm 以内的点（机器人自身部件反射）
+          obstacle_min_range: 0.0     # 忽略 15cm 以内的点（机器人自身部件反射）
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
@@ -327,7 +326,7 @@ planner_server:
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"  # Navfn 规划器（Dijkstra / A*）
       tolerance: 0.5                    # 目标容差（米），规划到这个范围内即认为到达
-      use_astar: false                  # false=Dijkstra（均匀搜索）, true=A*（启发式朝目标搜索）
+      use_astar: true                  # false=Dijkstra（均匀搜索）, true=A*（启发式朝目标搜索）
       allow_unknown: true               # 允许路径穿越未知区域（true=可以试探未知，适合探索）
 
 
@@ -396,10 +395,10 @@ velocity_smoother:
     smoothing_frequency: 20.0          # 平滑频率（Hz）
     scale_velocities: False            # 是否等比例缩放速度分量
     feedback: "OPEN_LOOP"              # 开环模式（不看实际里程计反馈）
-    max_velocity: [0.5, 0.5, 1.2]     # [x, y, theta] 最大速度
-    min_velocity: [-0.5, -0.5, -1.2]  # [x, y, theta] 最小速度（反向）
-    max_accel: [2.5, 2.5, 3.2]        # [x, y, theta] 最大加速度
-    max_decel: [-2.5, -2.5, -3.2]     # [x, y, theta] 最大减速度
+    max_velocity: [0.3, 0.3, 1.5]     # [x, y, theta] 最大速度（对齐 DWB）
+    min_velocity: [-0.3, -0.3, -1.5]  # [x, y, theta] 最小速度（反向）
+    max_accel: [2.0, 2.0, 3.0]        # [x, y, theta] 最大加速度
+    max_decel: [-2.0, -2.0, -3.0]     # [x, y, theta] 最大减速度
     odom_topic: "odom"                 # 里程计话题
     odom_duration: 0.1                 # 里程计平均窗口
     deadband_velocity: [0.0, 0.0, 0.0] # 死区速度
