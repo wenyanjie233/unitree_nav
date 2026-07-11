@@ -162,7 +162,7 @@ controller_server:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: True       # 在 RViz 中显示轨迹评分细节
 
-      # 速度边界（米/秒 & 弧度/秒）：Go1 最大约 0.5m/s 平移
+      # 速度边界（米/秒 & 弧度/秒）
       min_vel_x: -0.3                     # X 方向最小速度
       min_vel_y: -0.3                     # Y 方向最小速度（全向）
       max_vel_x: 0.3                      # X 方向最大速度
@@ -173,11 +173,11 @@ controller_server:
       min_speed_theta: 0.0                # 最小旋转速度
 
       # 加速度限制（米/秒² & 弧度/秒²）
-      acc_lim_x: 2.0                      # X 方向最大加速度
-      acc_lim_y: 2.0                      # Y 方向最大加速度
+      acc_lim_x: 1.5                      # X 方向最大加速度
+      acc_lim_y: 1.5                      # Y 方向最大加速度
       acc_lim_theta: 3.0                  # 旋转最大加速度
-      decel_lim_x: -2.0                   # X 方向最大减速度
-      decel_lim_y: -2.0                   # Y 方向最大减速度
+      decel_lim_x: -1.5                   # X 方向最大减速度
+      decel_lim_y: -1.5                   # Y 方向最大减速度
       decel_lim_theta: -3.0               # 旋转最大减速度
 
       # 轨迹采样：在每个维度上采样多少个速度值
@@ -229,8 +229,8 @@ local_costmap:
       # 膨胀层：在障碍物外围扩展安全区域
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0       # 代价衰减系数（越大衰减越快，膨胀圈越小）
-        inflation_radius: 0.55         # 膨胀半径（米）
+        cost_scaling_factor: 4.0       # 代价衰减系数（越大衰减越快，膨胀圈越小）
+        inflation_radius: 0.45         # 膨胀半径（米），折中值
 
       # 体素层：用 3D 点云/LaserScan 标记和清除障碍物
       voxel_layer:
@@ -252,7 +252,7 @@ local_costmap:
           raytrace_max_range: 3.0      # 光线追踪清除的最大距离（米）
           raytrace_min_range: 0.0      # 光线追踪清除的最小距离
           obstacle_max_range: 2.5      # 标记障碍物的最大距离（米）
-          obstacle_min_range: 0.0     # 忽略 15cm 以内的点（机器人自身部件反射）
+          obstacle_min_range: 0.0      # 忽略 15cm 以内的点
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
@@ -284,7 +284,7 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 3.0
+          raytrace_max_range: 2.5
           raytrace_min_range: 0.0
           obstacle_max_range: 2.5  
           obstacle_min_range: 0.0
@@ -295,8 +295,8 @@ global_costmap:
       # 膨胀层
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        cost_scaling_factor: 4.0       # 代价衰减系数（越大衰减越快，有效膨胀越小）
+        inflation_radius: 0.45         # 膨胀半径（米），折中值
       always_send_full_costmap: True
 
 
